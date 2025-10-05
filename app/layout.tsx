@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import { Toaster } from "sonner";
-import { MainSidebar } from "@/components/main-sidebar/main-sidebar";
-import { MainSidebarProvider } from "@/components/main-sidebar/provider";
+import { AppSidebar } from "@/components/app-sidebar";
+import { MainSidebar, MainSidebarProvider } from "@/components/main-sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { auth } from "./(auth)/auth";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -50,11 +53,16 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = cookies();
+  const mainOpen = cookieStore.get("main_sidebar_state")?.value !== "false";
+  const sidebarOpen = cookieStore.get("sidebar_state")?.value !== "false";
+  const session = await auth().catch(() => null);
+
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
@@ -73,7 +81,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased">
+      <body className="h-dvh antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -81,13 +89,19 @@ export default function RootLayout({
           enableSystem
         >
           <Toaster position="top-center" />
-          <SessionProvider>
-            <MainSidebarProvider>
-              <div className="flex h-screen overflow-hidden">
+          <SessionProvider session={session}>
+            <div className="flex h-full">
+              <MainSidebarProvider defaultOpen={mainOpen}>
                 <MainSidebar />
-                <main className="flex flex-1 overflow-hidden">{children}</main>
-              </div>
-            </MainSidebarProvider>
+              </MainSidebarProvider>
+              <SidebarProvider
+                className="flex flex-1"
+                defaultOpen={sidebarOpen}
+              >
+                <AppSidebar user={session?.user} />
+                <SidebarInset className="flex-1">{children}</SidebarInset>
+              </SidebarProvider>
+            </div>
           </SessionProvider>
         </ThemeProvider>
       </body>

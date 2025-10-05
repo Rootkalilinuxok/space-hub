@@ -32,16 +32,31 @@ function getInitialSidebarState() {
   return value !== "false";
 }
 
+type MainSidebarProviderProps = {
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+};
+
 export function MainSidebarProvider({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [open, setOpenState] = React.useState(true);
+  defaultOpen,
+}: MainSidebarProviderProps) {
+  const [open, setOpenState] = React.useState(() => {
+    if (typeof defaultOpen === "boolean") {
+      return defaultOpen;
+    }
+
+    return getInitialSidebarState();
+  });
 
   React.useEffect(() => {
+    if (typeof defaultOpen === "boolean") {
+      setOpenState(defaultOpen);
+      return;
+    }
+
     setOpenState(getInitialSidebarState());
-  }, []);
+  }, [defaultOpen]);
 
   const setOpen = React.useCallback(
     (nextOpen: boolean | ((value: boolean) => boolean)) => {
