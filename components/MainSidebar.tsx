@@ -100,7 +100,7 @@ function NavigationSection({
 
 export function MainSidebar() {
   return (
-    <aside className="flex h-full w-72 flex-col border-r bg-background px-5 py-6">
+    <aside className="flex h-full w-64 flex-col border-r bg-background px-5 py-6">
       <div className="flex items-center gap-3 px-2">
         <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-lg font-semibold text-primary-foreground">
           SH
