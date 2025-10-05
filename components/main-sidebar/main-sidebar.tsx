@@ -1,22 +1,8 @@
 "use client";
 
-import type { LucideIcon } from "lucide-react";
-import {
-  BarChart3,
-  Calendar,
-  CheckSquare,
-  ChevronLeft,
-  ChevronRight,
-  LayoutDashboard,
-  LogOut,
-  MessageSquare,
-  Plug,
-  Rocket,
-  Settings,
-  Sparkles,
-  Workflow,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight, LogOut, Sparkles } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -24,100 +10,38 @@ import { cn } from "@/lib/utils";
 
 import { useMainSidebar } from "./provider";
 
-const mainNavigation = [
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Messaggi",
-    href: "/messages",
-    icon: MessageSquare,
-  },
-  {
-    label: "Attività",
-    href: "/tasks",
-    icon: CheckSquare,
-  },
-  {
-    label: "Calendario",
-    href: "/calendar",
-    icon: Calendar,
-  },
-];
-
-const servicesNavigation = [
-  {
-    label: "Automazioni",
-    href: "/services/automations",
-    icon: Workflow,
-  },
-  {
-    label: "Campagne",
-    href: "/services/campaigns",
-    icon: Rocket,
-  },
-  {
-    label: "Integrazioni",
-    href: "/services/integrations",
-    icon: Plug,
-  },
-  {
-    label: "Analisi",
-    href: "/services/analytics",
-    icon: BarChart3,
-  },
-  {
-    label: "Impostazioni",
-    href: "/settings",
-    icon: Settings,
-  },
-];
-
-type NavigationSectionProps = {
-  title: string;
-  items: {
-    label: string;
-    href: string;
-    icon: LucideIcon;
-  }[];
+type NavItemProps = {
+  href: string;
+  label: string;
   open: boolean;
 };
 
-function NavigationSection({ title, items, open }: NavigationSectionProps) {
+function NavItem({ href, label, open }: NavItemProps) {
+  const pathname = usePathname();
+  const isActive = pathname === href;
+
   return (
-    <div className="space-y-3">
-      {open ? (
-        <p className="px-2 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
-          {title}
-        </p>
-      ) : (
-        <p className="sr-only">{title}</p>
+    <Link
+      className={cn(
+        "flex w-full items-center rounded-md px-2 py-2 text-sm font-medium transition-colors",
+        open ? "justify-start" : "justify-center px-0",
+        isActive
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
       )}
-      <ul className="space-y-1">
-        {items.map((item) => (
-          <li key={item.label}>
-            <Link
-              className={cn(
-                "flex items-center gap-3 rounded-md px-2 py-2 font-medium text-muted-foreground text-sm transition-colors hover:bg-accent hover:text-accent-foreground",
-                open ? "justify-start" : "justify-center px-0"
-              )}
-              href={item.href}
-            >
-              <item.icon className="size-4" strokeWidth={1.8} />
-              {open ? (
-                <span className="transition-opacity duration-200">
-                  {item.label}
-                </span>
-              ) : (
-                <span className="sr-only">{item.label}</span>
-              )}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+      href={href}
+    >
+      {open ? (
+        <span className="transition-opacity duration-200">{label}</span>
+      ) : (
+        <>
+          <span className="text-[10px] font-semibold uppercase leading-none">
+            {label.charAt(0)}
+          </span>
+          <span className="sr-only">{label}</span>
+        </>
+      )}
+    </Link>
   );
 }
 
@@ -185,16 +109,44 @@ export function MainSidebar() {
         <div
           className={cn("space-y-8 overflow-y-auto", open ? "pr-2" : "w-full")}
         >
-          <NavigationSection
-            items={mainNavigation}
-            open={open}
-            title="Principale"
-          />
-          <NavigationSection
-            items={servicesNavigation}
-            open={open}
-            title="Servizi"
-          />
+          <div className="space-y-3">
+            {open ? (
+              <p className="px-2 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Menu
+              </p>
+            ) : (
+              <p className="sr-only">Menu</p>
+            )}
+            <div className="space-y-1">
+              <NavItem href="/hub" label="Hub" open={open} />
+              <NavItem href="/" label="Home" open={open} />
+              <NavItem href="/residenza" label="Residenza" open={open} />
+              <NavItem href="/lavoro" label="Lavoro" open={open} />
+              <NavItem href="/impresa" label="Impresa" open={open} />
+              <NavItem href="/immigrazione" label="Immigrazione" open={open} />
+              <NavItem href="/pensionati" label="Pensionati" open={open} />
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {open ? (
+              <p className="px-2 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+                Servizi
+              </p>
+            ) : (
+              <p className="sr-only">Servizi</p>
+            )}
+            <div
+              className={cn(
+                "flex w-full items-center justify-center rounded-md border border-dashed border-muted-foreground/40 text-muted-foreground transition-colors",
+                open
+                  ? "px-3 py-8 text-center text-sm"
+                  : "h-10 w-10 text-[10px] uppercase"
+              )}
+            >
+              {open ? "Prossimamente disponibili" : "Servizi"}
+            </div>
+          </div>
         </div>
       </nav>
 
