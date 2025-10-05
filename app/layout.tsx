@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
+import { MainSidebar } from "@/components/main-sidebar/main-sidebar";
+import { MainSidebarProvider } from "@/components/main-sidebar/provider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { MainSidebar } from "@/components/MainSidebar";
 
 import "./globals.css";
 import { SessionProvider } from "next-auth/react";
@@ -81,10 +82,12 @@ export default function RootLayout({
         >
           <Toaster position="top-center" />
           <SessionProvider>
-            <div className="flex h-screen overflow-hidden">
-              <MainSidebar />
-              <main className="flex flex-1 overflow-hidden">{children}</main>
-            </div>
+            <MainSidebarProvider>
+              <div className="flex h-screen overflow-hidden">
+                <MainSidebar />
+                <main className="flex flex-1 overflow-hidden">{children}</main>
+              </div>
+            </MainSidebarProvider>
           </SessionProvider>
         </ThemeProvider>
       </body>
