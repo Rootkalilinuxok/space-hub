@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 
 import "./globals.css";
+import { AppSidebar } from "@/components/app-sidebar";
+import { DataStreamProvider } from "@/components/data-stream-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { SessionProvider } from "next-auth/react";
+import { auth } from "app/(auth)/auth";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://chat.vercel.ai"),
@@ -48,11 +54,14 @@ const THEME_COLOR_SCRIPT = `\
   updateThemeColor();
 })();`;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [session, cookieStore] = await Promise.all([auth(), cookies()]);
+  const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
+
   return (
     <html
       className={`${geist.variable} ${geistMono.variable}`}
@@ -78,8 +87,19 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
+          <Script
+            src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
+            strategy="beforeInteractive"
+          />
           <Toaster position="top-center" />
-          <SessionProvider>{children}</SessionProvider>
+          <SessionProvider session={session}>
+            <DataStreamProvider>
+              <SidebarProvider defaultOpen={!isCollapsed}>
+                <AppSidebar user={session?.user} />
+                <SidebarInset>{children}</SidebarInset>
+              </SidebarProvider>
+            </DataStreamProvider>
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>
